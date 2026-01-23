@@ -1,0 +1,42 @@
+from langchain_cerebras import ChatCerebras
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from cerebras.cloud.sdk import Cerebras
+import os
+
+import os
+os.environ["OPENAI_API_KEY"] = "api_key"
+
+output_language = input("Give the language of your preference: ")
+
+output_language = output_language.strip().lower().replace('"', '')
+
+if output_language == "french":
+    input_prompt = "Start the sentence with Bonjour! and translate the text to Hindi"
+elif output_language == "spanish":
+    input_prompt = "Start the sentence with Namaste! and translate the text to Spanish"
+else:
+    input_prompt = "Start the sentence with 'Oh not an option!' and translate the text to the given language"
+
+llm = ChatCerebras(
+    model="llama-3.1-8b",
+    temperature=0
+)
+
+prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        "You are a helpful assistant that works according to the {input_prompt} "
+        "and translates the text according to the prompt."
+    ),
+    ("human", "{text}")
+])
+
+chain = prompt | llm | StrOutputParser()
+
+result = chain.invoke({
+    "input_prompt": input_prompt,
+    "text": "I am learning artificial intelligence"
+})
+
+print(result)
